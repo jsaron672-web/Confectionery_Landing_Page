@@ -230,3 +230,11 @@ select:focus{border-color:var(--ube);outline:none}
 
 .contact-only{margin:30px auto 0}
 .slide img{object-fit:contain}
+
+.lead-form .field.wide{grid-column:1/-1}
+.dt-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.lead-form label.sub{font-weight:500;font-size:.85rem;color:var(--muted);margin-bottom:4px}
+input[type="date"],input[type="time"]{min-height:46px;accent-color:var(--ube);color-scheme:light}
+:root[data-theme="dark"] input[type="date"],:root[data-theme="dark"] input[type="time"]{color-scheme:dark}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) input[type="date"],:root:not([data-theme="light"]) input[type="time"]{color-scheme:dark}}
+@media (max-width:420px){.dt-row{grid-template-columns:1fr}}

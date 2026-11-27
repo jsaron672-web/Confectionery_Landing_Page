@@ -73,15 +73,13 @@
     <form id="lead-form" class="lead-form" novalidate>
       <div class="field"><label for="l-name"><span class="ficon" aria-hidden="true">👤</span>Name</label><input id="l-name" name="name" type="text" autocomplete="name"><span class="err"></span></div>
       <div class="field"><label for="l-phone"><span class="ficon" aria-hidden="true">📞</span>Contact Number</label><input id="l-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="09XX XXX XXXX"><span class="err"></span></div>
-      <div class="field"><label for="l-time"><span class="ficon" aria-hidden="true">🕘</span>Best Time to Call</label>
-        <select id="l-time" name="time">
-          <option value="">Choose a time</option>
-          <option>Morning (8am–12pm)</option>
-          <option>Afternoon (12pm–5pm)</option>
-          <option>Evening (5pm–8pm)</option>
-          <option>Anytime</option>
-        </select><span class="err"></span></div>
-      <div class="field"><label for="l-loc"><span class="ficon" aria-hidden="true">📍</span>Target Location</label><input id="l-loc" name="location" type="text" placeholder="City / Province"><span class="err"></span></div>
+      <div class="field wide"><label class="lbl" for="l-date"><span class="ficon" aria-hidden="true">🕘</span>Best Time to Call</label>
+        <div class="dt-row">
+          <div><label class="sub" for="l-date">📅 Date</label><input id="l-date" name="date" type="date"></div>
+          <div><label class="sub" for="l-time">⏰ Time</label><input id="l-time" name="time" type="time" step="900"></div>
+        </div><span class="err"></span></div>
+      <div class="field wide"><label for="l-loc"><span class="ficon" aria-hidden="true">📍</span>Target Location</label><input id="l-loc" name="location" type="text" placeholder="City / Province"><span class="err"></span></div>
+      <input type="text" name="_honey" tabindex="-1" autocomplete="off" aria-hidden="true" style="display:none">
       <div class="full"><button class="btn gold" type="submit">Request a call</button><p id="lead-msg" role="status"></p></div>
     </form>
   </div>

@@ -107,43 +107,73 @@ if (form) {
   });
 }
 
-// 8) Lead form (Name, Contact Number, Best Time to Call, Target Location)
-// To receive entries, paste your form endpoint below (e.g. a Formspree or Google Apps Script URL).
-const LEAD_ENDPOINT = '';
+// 8) Lead form: Name, Contact Number, Best Time to Call (date + time), Target Location
+// Entries are emailed to legasyn@confectioneryph.com through FormSubmit.
+const LEAD_ENDPOINT = 'https://formsubmit.co/ajax/legasyn@confectioneryph.com';
 const leadForm = $('#lead-form');
 if (leadForm) {
+  const pad = (n) => String(n).padStart(2, '0');
+  const now = new Date();
+  const todayStr = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate());
+  leadForm.elements.date.min = todayStr;
+  function niceDate(v) {
+    const d = new Date(v + 'T00:00:00');
+    return d.toLocaleDateString('en-PH', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  }
+  function niceTime(v) {
+    const [h, m] = v.split(':').map(Number);
+    return ((h % 12) || 12) + ':' + pad(m) + ' ' + (h >= 12 ? 'PM' : 'AM');
+  }
   leadForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const f = leadForm.elements, msg = $('#lead-msg');
     let ok = true;
     function check(field, good, text) {
       field.classList.toggle('invalid', !good);
-      field.parentElement.querySelector('.err').textContent = good ? '' : text;
+      field.closest('.field').querySelector('.err').textContent = good ? '' : text;
       if (!good) ok = false;
     }
     check(f.name, f.name.value.trim().length >= 2, 'Please enter your name.');
     check(f.phone, /^[0-9+()\-\s]{7,}$/.test(f.phone.value.trim()), 'Please enter a valid contact number.');
-    check(f.time, f.time.value !== '', 'Please choose a time.');
+    const dateOk = f.date.value !== '' && f.date.value >= todayStr, timeOk = f.time.value !== '';
+    f.date.classList.toggle('invalid', !dateOk);
+    f.time.classList.toggle('invalid', !timeOk);
+    f.date.closest('.field').querySelector('.err').textContent = !dateOk ? 'Please pick a date (today or later).' : (!timeOk ? 'Please pick a time.' : '');
+    if (!dateOk || !timeOk) ok = false;
     check(f.location, f.location.value.trim().length >= 2, 'Please enter your target location.');
     msg.className = '';
     if (!ok) { msg.textContent = ''; return; }
+    const when = niceDate(f.date.value) + ', ' + niceTime(f.time.value);
     if (!LEAD_ENDPOINT) {
-      msg.textContent = 'Looks good, ' + f.name.value.trim() + '! (Demo only: this form is not connected yet, so nothing was sent.)';
+      msg.textContent = 'Looks good, ' + f.name.value.trim() + '! (Demo only: this form is not connected here, so nothing was sent.)';
       leadForm.reset();
       return;
     }
+    const btn = leadForm.querySelector('button[type="submit"]');
+    btn.disabled = true;
     try {
       const res = await fetch(LEAD_ENDPOINT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify({ name: f.name.value.trim(), phone: f.phone.value.trim(), bestTimeToCall: f.time.value, targetLocation: f.location.value.trim() })
+        body: JSON.stringify({
+          _subject: 'New call-back request: ' + f.name.value.trim(),
+          _template: 'table',
+          _captcha: 'false',
+          _honey: f._honey.value,
+          'Name': f.name.value.trim(),
+          'Contact Number': f.phone.value.trim(),
+          'Best Time to Call': when,
+          'Target Location': f.location.value.trim()
+        })
       });
       if (!res.ok) throw new Error('bad response');
-      msg.textContent = 'Thank you, ' + f.name.value.trim() + '! We will call you soon.';
+      msg.textContent = 'Thank you, ' + f.name.value.trim() + '! We will call you on ' + when + '.';
       leadForm.reset();
     } catch (err) {
       msg.className = 'bad';
       msg.textContent = 'Sorry, something went wrong. Please try again.';
+    } finally {
+      btn.disabled = false;
     }
   });
 }
